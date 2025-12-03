@@ -37,6 +37,29 @@ module Israeli
         Luhn.valid?(padded)
       end
 
+      # Returns the reason why an ID is invalid.
+      #
+      # @param value [String, Integer, nil] The ID number to check
+      # @return [Symbol, nil] Reason code or nil if valid
+      #   - :blank - Input is nil or empty
+      #   - :wrong_length - Not 9 digits after padding
+      #   - :invalid_checksum - Luhn checksum failed
+      #
+      # @example
+      #   Israeli::Validators::Id.invalid_reason("123456789") # => :invalid_checksum
+      #   Israeli::Validators::Id.invalid_reason("")          # => :blank
+      #   Israeli::Validators::Id.invalid_reason("123456782") # => nil (valid)
+      def self.invalid_reason(value)
+        digits = Sanitizer.digits_only(value)
+        return :blank if digits.nil? || digits.empty?
+
+        padded = digits.rjust(9, "0")
+        return :wrong_length unless padded.match?(/\A\d{9}\z/)
+        return :invalid_checksum unless Luhn.valid?(padded)
+
+        nil
+      end
+
       # Formats an Israeli ID to standard 9-digit format.
       #
       # @param value [String, Integer, nil] The ID number to format
@@ -50,7 +73,7 @@ module Israeli
         return nil if digits.nil? || digits.empty?
 
         padded = digits.rjust(9, "0")
-        return nil unless valid?(padded)
+        return nil unless padded.match?(/\A\d{9}\z/) && Luhn.valid?(padded)
 
         padded
       end

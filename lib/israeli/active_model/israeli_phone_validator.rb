@@ -31,9 +31,14 @@ class IsraeliPhoneValidator < ActiveModel::EachValidator
     phone_type = options[:type] || :any
     return if Israeli::Validators::Phone.valid?(value, type: phone_type)
 
+    reason = Israeli::Validators::Phone.invalid_reason(value, type: phone_type)
+    detected_type = Israeli::Validators::Phone.detect_type(value)
     record.errors.add(
       attribute,
-      options[:message] || :invalid
+      options[:message] || :invalid,
+      reason: reason,
+      expected_type: phone_type,
+      detected_type: detected_type
     )
   end
 end

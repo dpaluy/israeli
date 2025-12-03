@@ -74,6 +74,51 @@ module Israeli
         value.match?(VOIP_PATTERN)
       end
 
+      # Detects the type of phone number.
+      #
+      # @param value [String, nil] The phone number to check
+      # @return [Symbol, nil] :mobile, :landline, :voip, or nil if invalid
+      #
+      # @example
+      #   Israeli::Validators::Phone.detect_type("0501234567")  # => :mobile
+      #   Israeli::Validators::Phone.detect_type("021234567")   # => :landline
+      #   Israeli::Validators::Phone.detect_type("0721234567")  # => :voip
+      #   Israeli::Validators::Phone.detect_type("invalid")     # => nil
+      def self.detect_type(value)
+        normalized = Sanitizer.normalize_phone(value)
+        return nil if normalized.nil? || normalized.empty?
+
+        return :mobile if mobile?(normalized)
+        return :landline if landline?(normalized)
+        return :voip if voip?(normalized)
+
+        nil
+      end
+
+      # Returns the reason why a phone number is invalid.
+      #
+      # @param value [String, nil] The phone number to check
+      # @param type [Symbol] Type to validate: :mobile, :landline, :voip, or :any
+      # @return [Symbol, nil] Reason code or nil if valid
+      #   - :blank - Input is nil or empty
+      #   - :invalid_format - Does not match any Israeli phone pattern
+      #   - :wrong_type - Valid phone but wrong type (e.g., landline when mobile expected)
+      #
+      # @example
+      #   Israeli::Validators::Phone.invalid_reason("abc")         # => :invalid_format
+      #   Israeli::Validators::Phone.invalid_reason("021234567", type: :mobile) # => :wrong_type
+      def self.invalid_reason(value, type: :any)
+        normalized = Sanitizer.normalize_phone(value)
+        return :blank if normalized.nil? || normalized.empty?
+
+        detected = detect_type(normalized)
+        return :invalid_format if detected.nil?
+
+        return nil if type == :any || type == detected
+
+        :wrong_type
+      end
+
       # Formats a phone number.
       #
       # @param value [String, nil] The phone number to format

@@ -31,6 +31,25 @@ module Israeli
         digits.match?(/\A\d{7}\z/)
       end
 
+      # Returns the reason why a postal code is invalid.
+      #
+      # @param value [String, nil] The postal code to check
+      # @return [Symbol, nil] Reason code or nil if valid
+      #   - :blank - Input is nil or empty
+      #   - :wrong_length - Not exactly 7 digits
+      #
+      # @example
+      #   Israeli::Validators::PostalCode.invalid_reason("123")     # => :wrong_length
+      #   Israeli::Validators::PostalCode.invalid_reason("")        # => :blank
+      #   Israeli::Validators::PostalCode.invalid_reason("2610101") # => nil (valid)
+      def self.invalid_reason(value)
+        digits = Sanitizer.digits_only(value)
+        return :blank if digits.nil? || digits.empty?
+        return :wrong_length unless digits.match?(/\A\d{7}\z/)
+
+        nil
+      end
+
       # Formats a postal code to standard representation.
       #
       # @param value [String, nil] The postal code to format

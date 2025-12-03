@@ -20,9 +20,11 @@ class IsraeliPostalCodeValidator < ActiveModel::EachValidator
 
     return if Israeli::Validators::PostalCode.valid?(value)
 
+    reason = Israeli::Validators::PostalCode.invalid_reason(value)
     record.errors.add(
       attribute,
-      options[:message] || :invalid
+      options[:message] || :invalid,
+      reason: reason
     )
   end
 end
