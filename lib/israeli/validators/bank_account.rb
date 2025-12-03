@@ -71,6 +71,56 @@ module Israeli
         numeric.to_i % 97 == 1
       end
 
+      # Returns the reason why a bank account is invalid.
+      #
+      # @param value [String, nil] The bank account to check
+      # @param format [Symbol] Format to validate: :domestic, :iban, or :any
+      # @return [Symbol, nil] Reason code or nil if valid
+      #   - :blank - Input is nil or empty
+      #   - :wrong_length - Incorrect number of digits/characters
+      #   - :invalid_checksum - IBAN mod 97 checksum failed
+      #   - :invalid_format - Does not match domestic or IBAN pattern
+      #
+      # @example
+      #   Israeli::Validators::BankAccount.invalid_reason("123")  # => :wrong_length
+      def self.invalid_reason(value, format: :any)
+        return :blank if value.nil? || value.to_s.strip.empty?
+
+        case format
+        when :domestic then domestic_invalid_reason(value)
+        when :iban then iban_invalid_reason(value)
+        when :any then any_format_invalid_reason(value)
+        else :invalid_format
+        end
+      end
+
+      def self.domestic_invalid_reason(value)
+        digits = Sanitizer.digits_only(value)
+        return :blank if digits.nil? || digits.empty?
+
+        digits.length == 13 ? nil : :wrong_length
+      end
+      private_class_method :domestic_invalid_reason
+
+      def self.iban_invalid_reason(value)
+        normalized = value.to_s.gsub(/\s/, "").upcase
+        return :wrong_length unless normalized.length == 23
+        return :invalid_format unless normalized.match?(/\AIL\d{21}\z/)
+
+        valid_iban?(normalized) ? nil : :invalid_checksum
+      end
+      private_class_method :iban_invalid_reason
+
+      def self.any_format_invalid_reason(value)
+        digits = Sanitizer.digits_only(value)
+        normalized = value.to_s.gsub(/\s/, "").upcase
+
+        return nil if digits&.length == 13 || valid_iban?(normalized)
+
+        :invalid_format
+      end
+      private_class_method :any_format_invalid_reason
+
       # Formats a bank account to a specified style.
       #
       # @param value [String, nil] The bank account to format

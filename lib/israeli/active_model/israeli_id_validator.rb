@@ -20,9 +20,11 @@ class IsraeliIdValidator < ActiveModel::EachValidator
 
     return if Israeli::Validators::Id.valid?(value)
 
+    reason = Israeli::Validators::Id.invalid_reason(value)
     record.errors.add(
       attribute,
-      options[:message] || :invalid
+      options[:message] || :invalid,
+      reason: reason
     )
   end
 end

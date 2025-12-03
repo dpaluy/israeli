@@ -26,9 +26,12 @@ class IsraeliBankAccountValidator < ActiveModel::EachValidator
     account_format = options[:format] || :any
     return if Israeli::Validators::BankAccount.valid?(value, format: account_format)
 
+    reason = Israeli::Validators::BankAccount.invalid_reason(value, format: account_format)
     record.errors.add(
       attribute,
-      options[:message] || :invalid
+      options[:message] || :invalid,
+      reason: reason,
+      expected_format: account_format
     )
   end
 end

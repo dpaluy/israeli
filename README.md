@@ -178,6 +178,104 @@ bundle exec rubocop        # Run linter
 bundle exec rake           # Run both
 ```
 
+## Advanced Usage
+
+### Bang Methods (Exception-raising)
+
+For fail-fast validation, use bang methods that raise exceptions:
+
+```ruby
+Israeli.valid_id!("123456789")
+# => raises Israeli::InvalidIdError with reason: :invalid_checksum
+
+Israeli.valid_phone!("021234567", type: :mobile)
+# => raises Israeli::InvalidPhoneError with reason: :wrong_type
+
+# Catch specific errors
+begin
+  Israeli.valid_id!(user_input)
+rescue Israeli::InvalidIdError => e
+  puts "Invalid ID: #{e.reason}"  # => :blank, :wrong_length, or :invalid_checksum
+end
+```
+
+### Parse Methods (Rich Result Objects)
+
+For more detailed validation information, use parse methods:
+
+```ruby
+# Phone parsing with type detection
+result = Israeli.parse_phone("0501234567")
+result.valid?   # => true
+result.type     # => :mobile
+result.mobile?  # => true
+result.formatted(style: :dashed)        # => "050-123-4567"
+result.formatted(style: :international) # => "+972-501234567"
+
+# ID parsing
+result = Israeli.parse_id("123456789")
+result.valid?  # => false
+result.reason  # => :invalid_checksum
+
+# Bank account with format detection
+result = Israeli.parse_bank_account("IL620108000000099999999")
+result.iban?      # => true
+result.domestic?  # => false
+result.format     # => :iban
+```
+
+### Phone Type Detection
+
+Detect phone number type without validation:
+
+```ruby
+Israeli.phone_type("0501234567")  # => :mobile
+Israeli.phone_type("021234567")   # => :landline
+Israeli.phone_type("0721234567")  # => :voip
+Israeli.phone_type("invalid")     # => nil
+```
+
+### Invalid Reason Detection
+
+Get detailed validation failure reasons:
+
+```ruby
+Israeli::Validators::Id.invalid_reason("123456789")  # => :invalid_checksum
+Israeli::Validators::Id.invalid_reason("")           # => :blank
+Israeli::Validators::Phone.invalid_reason("021234567", type: :mobile)  # => :wrong_type
+```
+
+### Rails errors.details Support
+
+Validators include structured error details for Rails 5+:
+
+```ruby
+# Model definition
+class Person < ApplicationRecord
+  validates :id_number, israeli_id: true
+  validates :mobile_phone, israeli_phone: { type: :mobile }
+end
+
+# Usage
+person = Person.new(id_number: "123456789", mobile_phone: "021234567")
+person.valid?  # => false
+
+person.errors.details[:id_number]
+# => [{error: :invalid, reason: :invalid_checksum}]
+
+person.errors.details[:mobile_phone]
+# => [{error: :invalid, reason: :wrong_type, expected_type: :mobile, detected_type: :landline}]
+```
+
+## Roadmap
+
+Future versions may include:
+
+- [ ] **Business/Company Number (Mispar Osek/Hevra)** - 9-digit with checksum validation
+- [ ] **Vehicle License Plates** - Format validation for Israeli plates
+- [ ] **Non-Profit (Amuta) Numbers** - 580-prefix validation
+- [ ] **Luhn Checksum Generator** - Generate valid IDs for testing
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/dpaluy/israeli.
