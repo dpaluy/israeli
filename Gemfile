@@ -13,4 +13,4 @@ gem "minitest", "~> 5.0"
 gem "rubocop", "~> 1.21"
 
 # For testing ActiveModel validators
-gem "activemodel", "~> 7.0"
+gem "activemodel", "~> 8.1"
