@@ -1,0 +1,28 @@
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  SuggestExtensions: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+# Allow longer methods for validation logic
+Metrics/MethodLength:
+  Max: 15
+
+# Allow higher complexity for validation switch statements
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+# Exclude test files from class length checks
+Metrics/ClassLength:
+  Exclude:
+    - "test/**/*"
+
+# Allow numbers in test method names (test_valid_mobile_050)
+Naming/VariableNumber:
+  Exclude:
+    - "test/**/*"
