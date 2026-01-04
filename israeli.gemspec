@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["documentation_uri"] = "https://rubydoc.info/gems/israeli"
   spec.metadata["source_code_uri"] = "https://github.com/dpaluy/israeli"
-  spec.metadata["changelog_uri"] = "https://github.com/dpaluy/israeli/blob/main/CHANGELOG.md"
+  spec.metadata["changelog_uri"] = "https://github.com/dpaluy/israeli/blob/master/CHANGELOG.md"
   spec.metadata["bug_tracker_uri"] = "https://github.com/dpaluy/israeli/issues"
 
   # Specify which files should be added to the gem when it is released.
