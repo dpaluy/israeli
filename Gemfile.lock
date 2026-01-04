@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    israeli (0.2.0)
+    israeli (0.3.0)
 
 GEM
   remote: https://rubygems.org/
