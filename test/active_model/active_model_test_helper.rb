@@ -9,6 +9,8 @@ require "israeli/active_model/israeli_postal_code_validator"
 require "israeli/active_model/israeli_phone_validator"
 require "israeli/active_model/israeli_bank_account_validator"
 
+# Shared helper intentionally defines multiple test models.
+# rubocop:disable Style/OneClassPerFile
 # Base test model for validation testing
 class TestModelBase
   include ActiveModel::Validations
@@ -90,3 +92,4 @@ end
 class BankAccountTestModelCustomMessage < TestModelBase
   validates :bank_account, israeli_bank_account: { message: "must be a valid Israeli bank account" }
 end
+# rubocop:enable Style/OneClassPerFile
